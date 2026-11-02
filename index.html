@@ -5,7 +5,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Drew's Fit Tracker"><meta name="theme-color" content="#000000">
 <style>
-:root{--a:#4da3ff;--push:#14b8a6;--pull:#1d4ed8;--legs:#a855f7;--cardio:#ec4899;--rest:#6b7280;--bd:#1d2636;--mu:#8a9bb5}
+:root{--a:#4da3ff;--push:#14b8a6;--pull:#1d4ed8;--legs:#a855f7;--cardio:#ec4899;--rest:#6b7280;--abs:#f97316;--bd:#1d2636;--mu:#8a9bb5}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,system-ui,sans-serif;margin:0;background:#000;color:#eee;padding-bottom:env(safe-area-inset-bottom)}
 header{position:sticky;top:0;z-index:5;background:#000;color:var(--a);padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;text-align:center;font-weight:700;font-size:19px;border-bottom:1px solid #12203a}
@@ -55,8 +55,8 @@ li:last-child{border-bottom:0}ul{padding:0;margin:0}.sub{color:var(--mu);font-si
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border-radius:20px;padding:6px 12px;font-size:14px;font-weight:700;color:#000}
 .tap{display:flex;justify-content:space-between;align-items:center;cursor:pointer}.tap:after{content:'›';color:var(--mu);font-size:22px}
 .nav3{grid-template-columns:repeat(4,1fr)}.nav2{grid-template-columns:1fr 1fr}
-.ppl{flex-wrap:wrap}.ppl button{flex:1 0 30%}
-.ppl button.on[data-t=Cardio]{background:var(--cardio);color:#fff}.ppl button.on[data-t=Rest]{background:var(--rest);color:#000}
+.ppl{flex-wrap:wrap}.ppl button{flex:1 0 30%}.leg{flex-wrap:wrap;gap:8px 12px}
+.ppl button.on[data-t=Cardio]{background:var(--cardio);color:#fff}.ppl button.on[data-t=Abs]{background:var(--abs);color:#000}.ppl button.on[data-t=Rest]{background:var(--rest);color:#000}
 .fc{font-size:9px;color:#9cc7ff;display:block;line-height:1}
 textarea{min-height:110px;font-size:14px}
 .rs{padding:10px;border-bottom:1px solid #161d2b}.rs b{font-weight:600}.rs small{display:block;color:var(--mu);margin-top:2px}
@@ -78,7 +78,7 @@ textarea{min-height:110px;font-size:14px}
 </div>
 <div class="page" id="pg-wo">
  <div class="card"><div class="lbl">Log workout · pick one or more</div>
-  <div class="seg ppl"><button data-t="Push" onclick="pick(this)">Push</button><button data-t="Pull" onclick="pick(this)">Pull</button><button data-t="Legs" onclick="pick(this)">Legs</button><button data-t="Cardio" onclick="pick(this)">Cardio</button><button data-t="Rest" onclick="pick(this)">Rest</button></div>
+  <div class="seg ppl"><button data-t="Push" onclick="pick(this)">Push</button><button data-t="Pull" onclick="pick(this)">Pull</button><button data-t="Legs" onclick="pick(this)">Legs</button><button data-t="Abs" onclick="pick(this)">Abs</button><button data-t="Cardio" onclick="pick(this)">Cardio</button><button data-t="Rest" onclick="pick(this)">Rest</button></div>
   <input id="wn" placeholder="Notes (optional, e.g. bench 185x5, 20 min incline)"><input id="wd" type="date">
   <button class="btn" id="wAdd" onclick="addW()">Log workout</button></div>
  <div class="card"><div class="lbl">Today</div><ul id="wToday"></ul><div class="hint" id="wkc"></div></div>
@@ -120,7 +120,7 @@ textarea{min-height:110px;font-size:14px}
  <div class="seg" id="hv"><button data-v="w" onclick="hView('w')">Week</button><button data-v="m" onclick="hView('m')">Month</button><button data-v="y" onclick="hView('y')">Year</button></div>
  <div class="row" style="margin:4px 0"><button class="x2" style="flex:0" onclick="hNav(-1)">‹</button><div id="hTitle" style="text-align:center;color:#fff;font-weight:600"></div><button class="x2" style="flex:0" onclick="hNav(1)">›</button></div>
  <div id="hcal"></div>
- <div class="leg"><span><i style="background:var(--push)"></i>Push</span><span><i style="background:var(--pull)"></i>Pull</span><span><i style="background:var(--legs)"></i>Legs</span><span><i style="background:var(--cardio)"></i>Cardio</span><span><i style="background:var(--rest)"></i>Rest</span></div>
+ <div class="leg"><span><i style="background:var(--push)"></i>Push</span><span><i style="background:var(--pull)"></i>Pull</span><span><i style="background:var(--legs)"></i>Legs</span><span><i style="background:var(--abs)"></i>Abs</span><span><i style="background:var(--cardio)"></i>Cardio</span><span><i style="background:var(--rest)"></i>Rest</span></div>
  <input type="date" id="hdate" onchange="hSel(this.value)" style="margin-top:10px">
  <div id="hday"></div>
 </div></div>
@@ -483,7 +483,7 @@ function parseLabel(t){t=String(t).replace(/[|•\t]/g,' ').replace(/(\d)\s*[oO]
 // FUTURE: async function aiEstimate(file){ /* send photo + ST.aiKey to a vision API, return {n,c,p,cb,f} then setCur(...) */ }
 
 // ---- workouts (multi-select: e.g. Push + Cardio same day) ----
-const WT=['Push','Pull','Legs','Cardio','Rest'];let sel=new Set();const WC={Push:'var(--push)',Pull:'var(--pull)',Legs:'var(--legs)',Cardio:'var(--cardio)',Rest:'var(--rest)'};
+const WT=['Push','Pull','Legs','Abs','Cardio','Rest'];let sel=new Set();const WC={Push:'var(--push)',Pull:'var(--pull)',Legs:'var(--legs)',Abs:'var(--abs)',Cardio:'var(--cardio)',Rest:'var(--rest)'};
 const chipTx=t=>t==='Pull'||t==='Cardio'?'#fff':'#000';
 function pick(b){const t=b.dataset.t;if(sel.has(t))sel.delete(t);else{sel.add(t)}
  document.querySelectorAll('.ppl button').forEach(x=>x.classList.toggle('on',sel.has(x.dataset.t)))}
