@@ -1,67 +1,496 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fit Tracker</title>
-<style>body{font-family:-apple-system,system-ui,sans-serif;margin:0;background:#000;color:#eee}
-header{background:#000;color:#3b8bff;padding:16px;text-align:center;font-weight:700;font-size:20px;border-bottom:1px solid #1a2a44}
-.tabs{display:flex}.tabs button{flex:1;padding:14px;border:0;background:#0a0a0a;color:#888;font-size:16px;border-bottom:2px solid #222}
-.tabs button.on{color:#3b8bff;font-weight:700;border-bottom:2px solid #3b8bff}
-.wrap{padding:16px;max-width:520px;margin:auto}
-.card{background:#111;border:1px solid #1d2636;border-radius:14px;padding:16px;margin-bottom:14px}
-.big{font-size:32px;font-weight:700;color:#fff}.lbl{color:#8a9bb5;font-size:13px;margin-bottom:4px}
-.bar{height:10px;background:#1e1e1e;border-radius:6px;overflow:hidden;margin-top:6px}.bar div{height:100%;background:#3b8bff}
-.bar.p div{background:#00c2ff}
-input,select{width:100%;padding:12px;font-size:16px;border:1px solid #2a3550;border-radius:10px;box-sizing:border-box;margin:4px 0;background:#0a0a0a;color:#fff;color-scheme:dark}
-.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
-.btn{width:100%;padding:14px;font-size:16px;border:0;border-radius:10px;background:#3b8bff;color:#fff;font-weight:700;margin-top:6px}
-.btn.alt{background:#0f2447;color:#7fb2ff}
-.step{flex:0 0 44px;height:44px;border-radius:10px;border:1px solid #2a3550;background:#0f2447;color:#7fb2ff;font-size:22px}
-.ppl{display:flex;gap:8px}.ppl button{flex:1;padding:16px;font-size:16px;border-radius:10px;border:2px solid #2a3550;background:#0a0a0a;color:#ccc}
-.ppl button.on{border-color:#3b8bff;background:#0f2447;color:#fff;font-weight:700}
-li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1d2636;list-style:none}
-ul{padding:0;margin:0}.x{color:#ff5c5c;border:0;background:none;font-size:16px}
-header{position:relative}.gear{position:absolute;right:12px;top:10px;background:none;border:0;color:#3b8bff;font-size:24px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9;align-items:flex-end;justify-content:center}.modal.on{display:flex}
-.sheet{background:#111;border-top:1px solid #1d2636;border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:520px;box-sizing:border-box}
-.shd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:#fff;font-size:18px}.x2{background:none;border:0;color:#3b8bff;font-size:16px;font-weight:700}
-.hint{color:#667;font-size:12px}</style></head><body>
-<header>Fit Tracker<button class="gear" onclick="setOpen(1)" aria-label="Settings">⚙︎</button></header>
-<div id="sm" class="modal" onclick="if(event.target==this)setOpen(0)"><div class="sheet"><div class="shd"><b>Settings</b><button class="x2" onclick="setOpen(0)">Done</button></div>
- <div><div class="lbl">Daily calorie goal</div><div class="row"><button class="step" onclick="adj('c',-50)">−</button><input id="gc" type="number" oninput="setG('c',this.value)"><button class="step" onclick="adj('c',50)">+</button></div>
- <div class="lbl" style="margin-top:10px">Daily protein goal (g)</div><div class="row"><button class="step" onclick="adj('p',-5)">−</button><input id="gp" type="number" oninput="setG('p',this.value)"><button class="step" onclick="adj('p',5)">+</button></div><div class="hint">Saves automatically.</div></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Drew's Fit Tracker</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Drew's Fit Tracker"><meta name="theme-color" content="#000000">
+<style>
+:root{--a:#4da3ff;--push:#14b8a6;--pull:#1d4ed8;--legs:#a855f7;--bd:#1d2636;--mu:#8a9bb5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,system-ui,sans-serif;margin:0;background:#000;color:#eee;padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:#000;color:var(--a);padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;text-align:center;font-weight:700;font-size:19px;border-bottom:1px solid #12203a}
+.gear{position:absolute;right:10px;bottom:8px;background:none;border:0;color:var(--a);font-size:24px}
+.wrap{padding:14px;max-width:520px;margin:auto}
+.card{background:#0e0e10;border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.lbl{color:var(--mu);font-size:13px;margin-bottom:4px}.hint{color:#667;font-size:12px;margin-top:4px}
+.mac{margin-bottom:12px}.mac:last-child{margin-bottom:0}.mac .top{display:flex;justify-content:space-between;align-items:baseline}
+.mac b{font-size:26px;color:#fff}.mac span{color:var(--mu);font-size:14px}
+.bar{height:8px;background:#1e1e1e;border-radius:6px;overflow:hidden;margin-top:6px}.bar div{height:100%;background:var(--a);transition:width .3s}
+input,select,textarea{width:100%;padding:11px;font-size:16px;border:1px solid #2a3550;border-radius:10px;margin:4px 0;background:#0a0a0a;color:#fff;color-scheme:dark;font-family:inherit}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}
+.btn{width:100%;padding:13px;font-size:16px;border:0;border-radius:11px;background:var(--a);color:#000;font-weight:700;margin-top:6px}
+.btn.alt{background:#0f1f3a;color:#9cc7ff}.btn.sm{padding:9px;font-size:14px;width:auto}.btn:disabled{opacity:.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.nav button{background:#0e0e10;border:1px solid var(--bd);border-radius:12px;color:#ccc;padding:12px 4px;font-size:13px}
+.nav button i{display:block;font-style:normal;font-size:20px;margin-bottom:3px}
+li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bd);list-style:none;font-size:15px}
+li:last-child{border-bottom:0}ul{padding:0;margin:0}.sub{color:var(--mu);font-size:13px;white-space:nowrap}
+.x{color:#ff5c5c;border:0;background:none;font-size:16px;padding:0 0 0 6px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9;align-items:flex-end;justify-content:center}.modal.on{display:flex}
+.sheet{background:#0e0e10;border-top:1px solid var(--bd);border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));width:100%;max-width:520px;max-height:92vh;overflow-y:auto}
+.shd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#fff;font-size:18px;position:sticky;top:-16px;background:#0e0e10;padding:4px 0}
+.x2{background:none;border:0;color:var(--a);font-size:16px;font-weight:700}
+.seg{display:flex;background:#0a0a0a;border:1px solid #2a3550;border-radius:10px;padding:3px;margin:6px 0}.seg button{flex:1;padding:9px;border:0;border-radius:8px;background:none;color:#aaa;font-size:15px}
+.seg button.on{background:#1b2c4d;color:#fff;font-weight:700}
+.ppl button.on[data-t=Push]{background:var(--push);color:#000}.ppl button.on[data-t=Pull]{background:var(--pull)}.ppl button.on[data-t=Legs]{background:var(--legs);color:#000}
+.ac{background:#0a0a0a;border:1px solid #2a3550;border-radius:10px;margin-top:-2px;max-height:240px;overflow-y:auto}.ac div{padding:10px;border-bottom:1px solid #161d2b;font-size:15px}
+.ac div small{color:var(--mu);margin-left:6px}.ac .tag{color:var(--a);font-size:11px;margin-left:6px}
+.mf{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mf label{font-size:11px;color:var(--mu)}.mf input{margin:2px 0;padding:9px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.cal .h{color:var(--mu);font-size:11px}
+.cal .d{aspect-ratio:1;border-radius:8px;background:#141418;font-size:13px;display:flex;align-items:center;justify-content:center;color:#ccc;position:relative;overflow:hidden}
+.cal .d.today{outline:1px solid var(--a)}.cal .d.sel{outline:2px solid #fff}.cal .d span{position:relative;z-index:1}
+.yr{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ym{font-size:11px;color:var(--mu)}.ym .g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:3px}
+.ym .g i{aspect-ratio:1;border-radius:2px;background:#17171c;display:block}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--mu);margin-top:8px;justify-content:center}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.wk div{border-radius:10px;background:#141418;padding:8px 2px;text-align:center;font-size:12px;color:#ccc;min-height:70px;overflow:hidden}
+.wk div b{display:block;font-size:15px;margin-bottom:4px}.pill{display:block;border-radius:6px;padding:2px 0;font-size:10px;margin-top:2px;color:#000;font-weight:700}
+.tg{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)}.tg input{width:auto;transform:scale(1.3)}
+.tg .gi{width:90px;margin:0 0 0 8px;padding:7px}
+.ing{display:grid;grid-template-columns:1fr 70px 60px 24px;gap:6px;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.ing input,.ing select{padding:7px;margin:0;font-size:15px}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#1b2c4d;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;display:none;z-index:20}
+</style></head><body>
+<header>Drew's Fit Tracker<button class="gear" onclick="openS('set')" aria-label="Settings">⚙︎</button></header>
+<div class="wrap">
+ <div class="card" id="macros"></div>
+ <div class="grid2"><button class="btn" onclick="openFood()">+ Add food</button><button class="btn alt" onclick="openS('wo')">+ Workout</button></div>
+ <div class="card" style="margin-top:12px"><div class="lbl">Today</div><ul id="tlist"></ul></div>
+ <div class="nav"><button onclick="openS('hist')"><i>📅</i>History</button><button onclick="openS('wt')"><i>⚖️</i>Weight</button><button onclick="openS('meals')"><i>🍝</i>Meals</button><button onclick="openFood();setTimeout(()=>lblIn.click(),50)"><i>📷</i>Label</button></div>
+</div>
+
+<!-- ADD FOOD -->
+<div id="m-food" class="modal"><div class="sheet"><div class="shd"><b id="fTitle">Add food</b><button class="x2" onclick="closeS()">Cancel</button></div>
+ <input id="fq" placeholder="Food (e.g. chicken breast)" autocomplete="off" oninput="acRun(this,'f')">
+ <div id="fac" class="ac" style="display:none"></div>
+ <div class="row"><input id="famt" type="number" inputmode="decimal" placeholder="Amount" oninput="recalc()"><select id="funit" onchange="recalc()"></select></div>
+ <div class="hint" id="fsrc"></div>
+ <div class="mf" id="fmf"></div>
+ <div class="row"><button class="btn alt sm" onclick="usdaSearch()">🔎 Look up online</button><button class="btn alt sm" onclick="lblIn.click()">📷 Nutrition label</button></div>
+ <input type="date" id="fdate">
+ <button class="btn" id="fAdd" onclick="addFood()">Add</button>
+ <div class="hint">Numbers are estimates — edit any field before adding. Custom and looked-up foods are saved to My Foods.</div>
 </div></div>
-<div class="tabs"><button id="t1" class="on" onclick="tab(1)">Nutrition</button><button id="t2" onclick="tab(2)">Workouts</button></div>
-<div class="wrap" id="p1">
- <div class="card"><div class="lbl">Calories today</div><div class="big"><span id="cal">0</span> / <span id="calG"></span></div><div class="bar"><div id="calB"></div></div></div>
- <div class="card"><div class="lbl">Protein today (g)</div><div class="big"><span id="pro">0</span> / <span id="proG"></span></div><div class="bar p"><div id="proB"></div></div></div>
- <div class="card"><input id="food" placeholder="Food (e.g. Chicken breast)"><div class="row"><input id="fc" type="number" placeholder="Calories"><input id="fp" type="number" placeholder="Protein g"></div><div class="hint">Fill in calories, protein, or both.</div><button class="btn" onclick="addFood()">Add</button></div>
- <div class="card"><div class="lbl">Today's log</div><ul id="flist"></ul></div>
-</div>
-<div class="wrap" id="p2" style="display:none">
- <div class="card"><div class="lbl">What did you train?</div><div class="ppl"><button onclick="pick(this)">Push</button><button onclick="pick(this)">Pull</button><button onclick="pick(this)">Legs</button></div>
- <input id="wn" placeholder="Notes (optional, e.g. bench 185x5)"><input id="wd" type="date"><button class="btn" onclick="addW()">Log workout</button></div>
- <div class="card"><div class="lbl">This week: <span id="wk"></span></div></div>
- <div class="card"><div class="lbl">History</div><ul id="wlist"></ul></div>
-</div>
+<input id="lblIn" type="file" accept="image/*" capture="environment" style="display:none" onchange="ocr(this)">
+
+<!-- WORKOUT -->
+<div id="m-wo" class="modal"><div class="sheet"><div class="shd"><b>Log workout</b><button class="x2" onclick="closeS()">Close</button></div>
+ <div class="seg ppl"><button data-t="Push" onclick="pick(this)">Push</button><button data-t="Pull" onclick="pick(this)">Pull</button><button data-t="Legs" onclick="pick(this)">Legs</button></div>
+ <input id="wn" placeholder="Notes (optional, e.g. bench 185x5)"><input id="wd" type="date">
+ <button class="btn" onclick="addW()">Log workout</button>
+ <div class="hint" id="wkc" style="text-align:center;margin-top:10px"></div>
+</div></div>
+
+<!-- HISTORY -->
+<div id="m-hist" class="modal"><div class="sheet"><div class="shd"><b>History</b><button class="x2" onclick="closeS()">Done</button></div>
+ <div class="seg" id="hv"><button data-v="w" onclick="hView('w')">Week</button><button data-v="m" onclick="hView('m')">Month</button><button data-v="y" onclick="hView('y')">Year</button></div>
+ <div class="row" style="margin:4px 0"><button class="x2" style="flex:0" onclick="hNav(-1)">‹</button><div id="hTitle" style="text-align:center;color:#fff;font-weight:600"></div><button class="x2" style="flex:0" onclick="hNav(1)">›</button></div>
+ <div id="hcal"></div>
+ <div class="leg"><span><i style="background:var(--push)"></i>Push</span><span><i style="background:var(--pull)"></i>Pull</span><span><i style="background:var(--legs)"></i>Legs</span></div>
+ <input type="date" id="hdate" onchange="hSel(this.value)" style="margin-top:10px">
+ <div id="hday"></div>
+</div></div>
+
+<!-- WEIGHT -->
+<div id="m-wt" class="modal"><div class="sheet"><div class="shd"><b>Weight</b><button class="x2" onclick="closeS()">Done</button></div>
+ <div class="card" style="text-align:center"><div class="lbl">Latest</div><div style="font-size:30px;font-weight:700;color:#fff" id="wLatest">—</div><div class="sub" id="wDelta"></div><div id="wChart"></div></div>
+ <div class="row"><input id="wv" type="number" inputmode="decimal" placeholder="Weight (lbs)"><input id="wdt" type="date"></div>
+ <button class="btn" onclick="addWt()">Save weight</button>
+ <div class="card" style="margin-top:12px"><ul id="wList"></ul></div>
+</div></div>
+
+<!-- MEALS -->
+<div id="m-meals" class="modal"><div class="sheet"><div class="shd"><b>Meals</b><button class="x2" onclick="closeS()">Done</button></div>
+ <ul id="mealList"></ul>
+ <button class="btn alt" onclick="mealEdit(-1)">+ New meal</button>
+ <div id="mb" style="display:none;margin-top:12px">
+  <input id="mName" placeholder="Meal name (e.g. Spaghetti)">
+  <div class="lbl" style="margin-top:6px">Ingredients</div>
+  <div id="mIngs"></div>
+  <input id="mq" placeholder="Add ingredient…" autocomplete="off" oninput="acRun(this,'m')"><div id="mac" class="ac" style="display:none"></div>
+  <div class="card" style="margin-top:8px" id="mTot"></div>
+  <div class="row"><div><div class="lbl">Batch makes (servings)</div><input id="mServ" type="number" value="1" inputmode="decimal" oninput="mRender()"></div><div><div class="lbl">I'm eating (servings)</div><input id="mEat" type="number" value="1" inputmode="decimal"></div></div>
+  <div class="row"><button class="btn alt" onclick="mealSave()">Save meal</button><button class="btn" onclick="mealLog()">Save &amp; log</button></div>
+ </div>
+</div></div>
+
+<!-- SETTINGS -->
+<div id="m-set" class="modal"><div class="sheet"><div class="shd"><b>Settings</b><button class="x2" onclick="closeS()">Done</button></div>
+ <div class="lbl">Show on home · daily goal</div><div id="setMac"></div>
+ <div class="lbl" style="margin-top:14px">My foods</div><ul id="myList"></ul>
+ <div class="lbl" style="margin-top:14px">Backup</div>
+ <div class="row"><button class="btn alt" onclick="exportData()">Export data</button><button class="btn alt" onclick="impIn.click()">Import data</button></div>
+ <input id="impIn" type="file" accept="application/json,.json" style="display:none" onchange="importData(this)">
+ <div class="hint">Your data is saved only on this phone. Export now and then to keep a backup file.</div>
+ <!-- FUTURE: meal-photo AI estimate. Add a settings field here, e.g.
+ <div class="lbl">AI photo key</div><input id="aiKey" oninput="ST.aiKey=this.value;save()"> and a 📸 button that calls aiEstimate(file) (stub in script). -->
+</div></div>
+<div id="toast"></div>
+
 <script>
-const S=k=>JSON.parse(localStorage.getItem(k)||'null'),W=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-const today=()=>new Date().toLocaleDateString('en-CA');
-let food_=0;let g=S('goals')||{c:2200,p:160},food=S('food')||{},wo=S('wo')||[],sel=null;
-function tab(n){p1.style.display=n==1?'':'none';p2.style.display=n==2?'':'none';t1.className=n==1?'on':'';t2.className=n==2?'on':''}
-function render(keep){if(!keep){gc.value=g.c;gp.value=g.p}const d=food[today()]||[];let c=0,p=0;flist.innerHTML='';
- d.forEach((f,i)=>{c+=f.c;p+=f.p;flist.innerHTML+=`<li><span>${f.n}</span><span>${f.c} cal · ${f.p}g <button class="x" onclick="delF(${i})">✕</button></span></li>`});
- cal.textContent=c;pro.textContent=p;calG.textContent=g.c;proG.textContent=g.p;
- calB.style.width=Math.min(100,c/g.c*100)+'%';proB.style.width=Math.min(100,p/g.p*100)+'%';
- wo.sort((a,b)=>b.d.localeCompare(a.d));wlist.innerHTML='';
- wo.forEach((w,i)=>wlist.innerHTML+=`<li><span><b>${w.t}</b> ${w.n||''}</span><span>${w.d} <button class="x" onclick="delW(${i})">✕</button></span></li>`);
- const wkAgo=new Date(Date.now()-6*864e5).toLocaleDateString('en-CA'),r=wo.filter(w=>w.d>=wkAgo);
- wk.textContent=['Push','Pull','Legs'].map(t=>t+' '+r.filter(w=>w.t==t).length).join(' · ')}
-function addFood(){const c=+fc.value||0,p=+fp.value||0;if(!c&&!p)return alert('Enter calories or protein');(food[today()]=food[today()]||[]).push({n:window.food.value||(c&&p?'Food':c?'Calories':'Protein'),c,p});
- W('food',food);window.food.value=fc.value=fp.value='';render()}
-function delF(i){food[today()].splice(i,1);W('food',food);render()}
-function setG(k,v){if(+v>0){g[k]=+v;W('goals',g);render(true)}}
-function adj(k,d){g[k]=Math.max(0,g[k]+d);W('goals',g);render()}
-function pick(b){document.querySelectorAll('.ppl button').forEach(x=>x.className='');b.className='on';sel=b.textContent}
-function addW(){if(!sel)return alert('Pick Push, Pull, or Legs');wo.push({t:sel,n:wn.value,d:wd.value||today()});W('wo',wo);wn.value='';render()}
-function setOpen(o){sm.className=o?"modal on":"modal"}
-function delW(i){wo.splice(i,1);W('wo',wo);render()}
-wd.value=today();render();
+const $=id=>document.getElementById(id);
+const S=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}},W=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const ymd=d=>{const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())};
+const today=()=>ymd(new Date()), pd=s=>{const[a,b,c]=s.split('-');return new Date(+a,b-1,+c)};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r1=n=>Math.round((+n||0)*10)/10;
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2000)}
+
+// ---- macros: entry keys (c,p kept from v1) ----
+const MAC=[{k:'c',n:'Calories',u:'',g:2200},{k:'p',n:'Protein',u:'g',g:160},{k:'cb',n:'Carbs',u:'g',g:220},{k:'f',n:'Fat',u:'g',g:70},{k:'fb',n:'Fiber',u:'g',g:30},{k:'s',n:'Sugar',u:'g',g:50},{k:'na',n:'Sodium',u:'mg',g:2300}];
+// ---- data (v1 keys preserved: goals, food, wo) ----
+let goals=S('goals')||{}; MAC.forEach(m=>{if(!(+goals[m.k]>0))goals[m.k]=m.g});
+let food=S('food')||{}, wo=S('wo')||[], weights=S('weight')||[], myFoods=S('myFoods')||[], meals=S('meals')||[];
+let ST=Object.assign({show:['c','p']},S('settings')||{});
+if(!Array.isArray(wo))wo=[]; if(typeof food!=='object'||Array.isArray(food))food={};
+function save(){W('goals',goals);W('food',food);W('wo',wo);W('weight',weights);W('myFoods',myFoods);W('meals',meals);W('settings',ST)}
+save();
+
+// ---- food DB (per 100 g): name|kcal|protein|carb|fat|fiber|pieceG|density g/ml ----
+const DB=`Chicken breast, cooked (skinless)|165|31|0|3.6|0
+Chicken breast, raw|120|22.5|0|2.6|0
+Chicken thigh, cooked (skinless)|209|26|0|10.9|0
+Chicken drumstick, cooked|172|28.3|0|5.7|0||
+Rotisserie chicken (meat & skin)|223|25|0|13|0
+Chicken wings, cooked|203|30.5|0|8.1|0|30
+Ground turkey 93/7, cooked|213|27.1|0|11.6|0
+Turkey breast, deli sliced|104|17.1|4.2|1.7|0
+Ground beef 80/20, cooked|254|25.9|0|16.6|0
+Ground beef 85/15, cooked|250|25.9|0|15.4|0
+Ground beef 90/10, cooked|217|26.1|0|11.7|0
+Ground beef 93/7, cooked|196|27|0|9|0
+Ground beef 80/20, raw|254|17.2|0|20|0
+Sirloin steak, cooked|206|29.6|0|8.9|0
+Ribeye steak, cooked|291|24|0|21|0
+Flank steak, cooked|192|28|0|8|0
+Pork chop, cooked|231|25.7|0|13.5|0
+Pork tenderloin, cooked|143|26.2|0|3.5|0
+Bacon, cooked|541|37|1.4|42|0|8
+Ham, sliced|145|21|1.5|5.5|0
+Sausage, pork, cooked|339|19.4|1.6|28|0|45
+Italian sausage, cooked|344|19.1|4.3|27.3|0|75
+Hot dog (beef)|290|10.4|4.2|26|0|45
+Salmon, Atlantic, cooked|206|22.1|0|12.4|0
+Salmon, raw|208|20.4|0|13.4|0
+Tuna, canned in water (drained)|116|25.5|0|0.8|0
+Tilapia, cooked|128|26.2|0|2.7|0
+Cod, cooked|105|22.8|0|0.9|0
+Shrimp, cooked|99|24|0.2|0.3|0|6
+Egg, whole (large, ~50 g)|143|12.6|0.7|9.5|0|50
+Egg, hard boiled|155|12.6|1.1|10.6|0|50
+Egg whites|52|10.9|0.7|0.2|0||1.03
+Liquid egg whites|48|10|1|0|0||1.03
+White rice, cooked|130|2.7|28.2|0.3|0.4||0.79
+Brown rice, cooked|123|2.7|25.6|1|1.6||0.82
+Jasmine rice, cooked|129|2.7|28|0.3|0.4||0.79
+Quinoa, cooked|120|4.4|21.3|1.9|2.8||0.78
+Pasta / spaghetti, cooked|158|5.8|30.9|0.9|1.8||0.59
+Pasta, dry|371|13|74.7|1.5|3.2
+Whole wheat pasta, cooked|149|6|30|1.7|3.9
+Egg noodles, cooked|138|4.5|25.2|2.1|1.2
+Ramen noodles (instant, prepared)|188|4|26|7|1
+White bread|266|8.9|49.4|3.3|2.7|28
+Whole wheat bread|252|12.5|42.7|3.5|6|32
+Sourdough bread|272|10.8|51.9|2.4|2.2|50
+Bagel, plain|257|10|50.5|1.6|2.2|105
+English muffin|227|8.9|44.2|1.7|3.5|57
+Hamburger bun|279|9.5|50|4.3|2.1|52
+Flour tortilla|304|8.2|50|7.6|3.5|45
+Corn tortilla|218|5.7|44.6|2.9|6.3|26
+Pita bread|275|9.1|55.7|1.2|2.2|60
+Oats, dry (rolled)|379|13.2|67.7|6.5|10.1||0.41
+Oatmeal, cooked with water|71|2.5|12|1.5|1.7||1
+Granola|471|10|64|20|5.3||0.5
+Cheerios|367|12|73|6.7|10||0.12
+Corn flakes|357|7.5|84|0.4|3.3||0.12
+Pancakes (plain)|227|6.4|28.3|9.7|1|40
+Waffle, frozen|273|6.6|41|9.5|2.2|35
+Potato, baked (with skin)|93|2.5|21.2|0.1|2.2|170
+Potato, boiled|87|1.9|20.1|0.1|1.8|150
+Mashed potatoes (with milk & butter)|113|1.9|16.8|4.2|1.5||0.89
+French fries|312|3.4|41.4|14.7|3.8
+Sweet potato, baked|90|2|20.7|0.2|3.3|150
+Broccoli, cooked|35|2.4|7.2|0.4|3.3||0.66
+Broccoli, raw|34|2.8|6.6|0.4|2.6||0.38
+Spinach, raw|23|2.9|3.6|0.4|2.2||0.13
+Spinach, cooked|23|3|3.8|0.3|2.4||0.76
+Lettuce, romaine|17|1.2|3.3|0.3|2.1||0.2
+Mixed salad greens|20|1.5|3.6|0.2|2||0.2
+Kale, raw|49|4.3|8.8|0.9|3.6||0.28
+Carrots, raw|41|0.9|9.6|0.2|2.8|61|0.55
+Green beans, cooked|35|1.9|7.9|0.3|3.2||0.53
+Asparagus, cooked|22|2.4|4.1|0.2|2
+Bell pepper|26|1|6|0.3|2.1|120|0.5
+Onion|40|1.1|9.3|0.1|1.7|110|0.67
+Tomato|18|0.9|3.9|0.2|1.2|123|0.75
+Cucumber|15|0.7|3.6|0.1|0.5|300|0.5
+Zucchini, cooked|17|1.2|3.1|0.3|1|200
+Mushrooms|22|3.1|3.3|0.3|1||0.3
+Cauliflower|25|1.9|5|0.3|2||0.45
+Brussels sprouts, cooked|36|2.6|7.1|0.5|2.6
+Corn, sweet, cooked|96|3.4|21|1.5|2.4||0.68
+Peas, green, cooked|84|5.4|15.6|0.2|5.5||0.68
+Avocado|160|2|8.5|14.7|6.7|150|0.62
+Banana|89|1.1|22.8|0.3|2.6|118
+Apple|52|0.3|13.8|0.2|2.4|182
+Orange|47|0.9|11.8|0.1|2.4|131
+Strawberries|32|0.7|7.7|0.3|2|12|0.6
+Blueberries|57|0.7|14.5|0.3|2.4||0.62
+Raspberries|52|1.2|11.9|0.7|6.5||0.52
+Grapes|69|0.7|18.1|0.2|0.9|5|0.64
+Watermelon|30|0.6|7.6|0.2|0.4||0.64
+Pineapple|50|0.5|13.1|0.1|1.4||0.69
+Mango|60|0.8|15|0.4|1.6|200|0.7
+Peach|39|0.9|9.5|0.3|1.5|150
+Pear|57|0.4|15.2|0.1|3.1|178
+Raisins|299|3.1|79.2|0.5|3.7||0.61
+Dates, medjool|277|1.8|75|0.2|6.7|24
+Orange juice|45|0.7|10.4|0.2|0.2||1.04
+Apple juice|46|0.1|11.3|0.1|0.2||1.04
+Whole milk|61|3.2|4.8|3.3|0||1.03
+2% milk|50|3.3|4.8|2|0||1.03
+Skim milk|34|3.4|5|0.1|0||1.03
+Fairlife 2% milk|54|5|2.5|1.9|0||1.03
+Almond milk, unsweetened|15|0.6|0.3|1.2|0.2||1.01
+Oat milk|48|1|6.7|2.1|0.8||1.03
+Greek yogurt, nonfat plain|59|10.3|3.6|0.4|0||1.05
+Greek yogurt, 2% plain|73|9.9|3.9|2|0||1.05
+Greek yogurt, whole plain|97|9|4|5|0||1.05
+Yogurt, flavored low-fat|99|4|19|1|0||1.05
+Cottage cheese, 2%|81|10.5|4.8|2.3|0||1.05
+Cheddar cheese|403|23|3.1|33|0||0.48
+Mozzarella, part-skim|254|24.3|2.8|15.9|0||0.47
+Parmesan, grated|420|28.4|13.9|27.8|0||0.42
+American cheese slice|307|16|8|23|0|21
+Swiss cheese|380|27|5.4|28|0|28
+Feta cheese|264|14.2|4.1|21.3|0||0.64
+Cream cheese|342|6|5.5|34|0||0.97
+String cheese|280|25|3.6|20|0|28
+Butter|717|0.9|0.1|81|0||0.96
+Heavy cream|340|2.8|2.7|36|0||0.99
+Sour cream|198|2.4|4.6|19.4|0||0.97
+Peanut butter|588|25|20|50|6||1.09
+Almond butter|614|21|18.8|55.5|10.3||1.1
+Almonds|579|21.2|21.6|49.9|12.5|1.2|0.6
+Peanuts|567|25.8|16.1|49.2|8.5||0.6
+Cashews|553|18.2|30.2|43.9|3.3||0.57
+Walnuts|654|15.2|13.7|65.2|6.7||0.42
+Chia seeds|486|16.5|42.1|30.7|34.4||0.69
+Olive oil|884|0|0|100|0||0.92
+Vegetable / canola oil|884|0|0|100|0||0.92
+Coconut oil|892|0|0|99|0||0.92
+Mayonnaise|680|1|0.6|75|0||0.92
+Ranch dressing|430|1.3|6|44|0||0.98
+Ketchup|101|1|27.4|0.1|0.3||1.15
+BBQ sauce|172|0.8|41|0.6|0.9||1.08
+Mustard|60|3.7|5.8|3.3|4||1.05
+Marinara / red pasta sauce|50|1.4|8|1.5|1.8||1.06
+Alfredo sauce|153|2.7|4|14|0||1.03
+Salsa|36|1.5|7|0.2|1.9||1.05
+Soy sauce|53|8.1|4.9|0.6|0.8||1.15
+Hummus|166|7.9|14.3|9.6|6||1.02
+Honey|304|0.3|82.4|0|0.2||1.42
+Maple syrup|260|0|67|0.1|0||1.32
+Sugar, white|387|0|100|0|0||0.85
+Jam / jelly|278|0.4|69|0.1|1||1.33
+Black beans, cooked|132|8.9|23.7|0.5|8.7||0.73
+Pinto beans, cooked|143|9|26.2|0.7|9||0.73
+Kidney beans, cooked|127|8.7|22.8|0.5|6.4||0.75
+Chickpeas, cooked|164|8.9|27.4|2.6|7.6||0.69
+Lentils, cooked|116|9|20.1|0.4|7.9||0.84
+Refried beans|91|5.4|15.5|1.2|5.2||1.0
+Tofu, firm|144|17.3|2.8|8.7|2.3||1.0
+Tempeh|192|20.3|7.6|10.8|0
+Edamame|121|11.9|8.9|5.2|5.2||0.66
+Whey protein powder|400|80|8|5|0|30|0.4
+Casein protein powder|360|80|8|1.5|0|33|0.4
+Plant protein powder|380|70|10|7|4|33|0.4
+Protein bar|360|33|40|10|10|60
+Premier Protein shake|46|9.4|1.2|1|0.3||1.04
+Pizza, cheese (slice)|266|11.4|33.3|9.7|2.3|107
+Pizza, pepperoni (slice)|298|12.5|32|13.3|2.3|110
+Cheeseburger (fast food)|263|13|26|12|1.3|135
+Burrito, beef & bean|210|9|25|8|3|220
+Chipotle-style chicken burrito bowl|135|10|13|4.5|2.5
+Mac and cheese|164|6.6|20|6.5|1||1.0
+Fried rice|163|4.8|25|4.7|1.2||0.8
+Chili with beans|112|8|11|4|3.5||1.0
+Lasagna (meat)|165|9.7|15|7.3|1.3
+Sushi roll (california)|146|3|20|5.6|1.3|30
+Tortilla chips|489|6.5|65|23|4.4
+Potato chips|536|7|53|35|4.4
+Popcorn, air-popped|387|13|78|4.5|15||0.03
+Pretzels|380|10|80|2.6|3
+Crackers (saltines)|418|9.5|74|8.7|2.9|3
+Rice cakes|387|8.2|81.5|2.8|4.2|9
+Dark chocolate (70-85%)|598|7.8|45.9|42.6|10.9
+Milk chocolate|535|7.7|59.4|29.7|3.4
+Ice cream, vanilla|207|3.5|23.6|11|0.7||0.55
+Chocolate chip cookie|488|5|65|24|2.4|16
+Donut, glazed|421|5.3|50|22.9|1.2|52
+Muffin, blueberry|377|4.4|54|16|1.4|113
+Beer, regular|43|0.5|3.6|0|0||1.01
+Light beer|29|0.2|1.6|0|0||1.0
+Wine, red|85|0.1|2.6|0|0||0.99
+Soda (cola)|42|0|10.6|0|0||1.04
+Sports drink|26|0|6.4|0|0||1.02
+Coffee, black|1|0.1|0|0|0||1.0
+Latte (2% milk)|54|3.5|5.3|1.9|0||1.03
+Coffee creamer|195|1|25|9|0||1.03
+`.trim().split('\n').map(l=>{const a=l.split('|');return{n:a[0],c:+a[1],p:+a[2],cb:+a[3],f:+a[4],fb:+a[5],pc:+a[6]||0,den:+a[7]||0,src:'db'}});
+const UNITS={g:1,oz:28.35,lb:453.6,kg:1000,ml:'v',cup:'v240',tbsp:'v15',tsp:'v5',piece:'pc',serving:'sv'};
+function gramsOf(fd,amt,u){const x=UNITS[u];if(u==='g')return amt;if(typeof x==='number')return amt*x;
+ if(u==='piece')return amt*(fd.pc||100); if(u==='serving')return amt*(fd.sv||100);
+ const ml=u==='ml'?amt:amt*+x.slice(1);return ml*(fd.den||1)}
+function unitsFor(fd){let u=['g','oz','lb','ml','cup','tbsp','tsp'];if(fd&&fd.pc)u.push('piece');if(fd&&fd.sv)u.unshift('serving');return u}
+function per(fd,g){const o={};MAC.forEach(m=>{if(fd[m.k]!=null&&fd[m.k]!=='')o[m.k]=(+fd[m.k])*g/100});return o}
+
+// ---- fuzzy search ----
+function score(name,q){name=name.toLowerCase();q=q.toLowerCase().trim();if(!q)return 0;const t=q.split(/\s+/);let s=0;
+ for(const w of t){const i=name.indexOf(w);if(i<0){let j=0;for(const ch of name)if(ch===w[j])j++;if(j<w.length)return 0;s+=1}else s+=i===0||/[\s,(\/]/.test(name[i-1])?6:3}
+ if(/\braw\b/.test(name)&&!/raw/.test(q))s-=1;return s-name.length/100}
+function search(q,withMeals){const res=[];
+ if(withMeals)meals.forEach((m,i)=>{const s=score(m.n,q);if(s>0)res.push({s:s+20,fd:mealFood(i),tag:'meal'})});
+ myFoods.forEach(f=>{const s=score(f.n,q);if(s>0)res.push({s:s+10,fd:f,tag:'mine'})});
+ DB.forEach(f=>{const s=score(f.n,q);if(s>0)res.push({s,fd:f})});
+ return res.sort((a,b)=>b.s-a.s).slice(0,12)}
+let acItems=[];
+function acRun(inp,mode){const box=$(mode==='f'?'fac':'mac'),q=inp.value;if(mode==='f'){cur=null;$('fsrc').textContent=''}
+ if(q.trim().length<2){box.style.display='none';return}acItems=search(q,mode==='f');
+ box.innerHTML=acItems.map((r,i)=>`<div onclick="acPick(${i},'${mode}')">${esc(r.fd.n)}${r.tag?`<span class="tag">${r.tag==='meal'?'MEAL':'MY FOOD'}</span>`:''}<small>${Math.round(r.fd.c)} cal · ${r1(r.fd.p)}g P${r.fd.sv?' /serv':' /100g'}</small></div>`).join('')||'<div style="color:#667">No match — type your own numbers or tap Look up online</div>';
+ box.style.display='block'}
+function acPick(i,mode){const fd=acItems[i].fd;$(mode==='f'?'fac':'mac').style.display='none';if(mode==='f')setCur(fd);else{mAdd(fd);$('mq').value=''}}
+
+// ---- add food sheet ----
+let cur=null,edited=false;
+function openFood(d){cur=null;edited=false;$('fq').value='';$('famt').value='';$('fac').style.display='none';$('fsrc').textContent='';$('fdate').value=d||today();setUnits(null);mfFill({});openS('food');setTimeout(()=>$('fq').focus(),100)}
+function setUnits(fd,keep){const s=$('funit'),old=s.value;s.innerHTML=unitsFor(fd).map(u=>`<option>${u}</option>`).join('');s.value=keep&&unitsFor(fd).includes(old)?old:(fd&&fd.sv?'serving':'g')}
+function mfFill(v){$('fmf').innerHTML=MAC.map(m=>`<div><label>${m.n}${m.u?' ('+m.u+')':''}</label><input id="mf_${m.k}" type="number" inputmode="decimal" value="${v[m.k]!=null?r1(v[m.k]):''}" oninput="edited=true"></div>`).join('')}
+function setCur(fd){cur=fd;edited=false;$('fq').value=fd.n;setUnits(fd);if(!$('famt').value)$('famt').value=fd.sv?1:(fd.pc&&!fd.sv?1:100);if(fd.pc&&!fd.sv)$('funit').value='piece';
+ $('fsrc').textContent=fd.src==='usda'?'From USDA FoodData Central':fd.src==='label'?'From nutrition label':fd.src==='meal'?'Saved meal':fd.src==='db'?'Built-in estimate (per 100 g)':'My food';recalc()}
+function recalc(){if(!cur)return;const g=gramsOf(cur,+$('famt').value||0,$('funit').value);mfFill(per(cur,g));edited=false}
+function readMF(){const o={};MAC.forEach(m=>{const v=$('mf_'+m.k).value;if(v!=='')o[m.k]=r1(v)});return o}
+function addFood(){const v=readMF(),n=$('fq').value.trim();if(!v.c&&!v.p)return toast('Enter at least calories or protein');
+ const amt=+$('famt').value||0,u=$('funit').value,d=$('fdate').value||today();
+ const e=Object.assign({n:n||'Food',c:0,p:0},v);if(amt)e.amt=amt,e.u=u;e.c=Math.round(e.c||0);e.p=r1(e.p||0);
+ (food[d]=food[d]||[]).push(e);
+ // remember custom / looked-up / edited foods as per-100g (or per-serving)
+ if(n&&amt&&(!cur||cur.src!=='db'||edited)&&!(cur&&cur.src==='meal')){const fdRef=cur||{den:1};const g=gramsOf(fdRef,amt,u);
+  if(g>0){const pf={n,src:'mine'};MAC.forEach(m=>{if(v[m.k]!=null)pf[m.k]=r1(v[m.k]*100/g)});if(cur){if(cur.pc)pf.pc=cur.pc;if(cur.den)pf.den=cur.den;if(cur.sv)pf.sv=cur.sv}else if(['piece','serving'].includes(u)){}
+   myFoods=myFoods.filter(f=>f.n.toLowerCase()!==n.toLowerCase());myFoods.unshift(pf)}}
+ save();closeS();render();toast('Added '+e.n)}
+function delF(d,i){if(!confirm('Delete this entry?'))return;food[d].splice(i,1);if(!food[d].length)delete food[d];save();render();if(curS==='hist')hSel(hSelD)}
+
+// ---- USDA online lookup ----
+async function usdaSearch(){const q=$('fq').value.trim();if(!q)return toast('Type a food first');const box=$('fac');box.style.display='block';box.innerHTML='<div>Searching USDA…</div>';
+ try{const r=await fetch('https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&pageSize=10&dataType=Foundation,SR%20Legacy,Survey%20(FNDDS)&query='+encodeURIComponent(q));
+  if(!r.ok)throw new Error(r.status);const j=await r.json();const pri={'Foundation':0,'SR Legacy':1,'Survey (FNDDS)':2};
+  acItems=(j.foods||[]).sort((a,b)=>(pri[a.dataType]??3)-(pri[b.dataType]??3)).map(f=>({fd:usdaParse(f),tag:''})).filter(x=>x.fd.c!=null);
+  if(!acItems.length){box.innerHTML='<div style="color:#667">No USDA results. Enter numbers yourself.</div>';return}
+  box.innerHTML=acItems.map((x,i)=>`<div onclick="acPick(${i},'f')">${esc(x.fd.n)}<small>${Math.round(x.fd.c)} cal · ${r1(x.fd.p)}g P /100g</small></div>`).join('')}
+ catch(e){box.innerHTML='<div style="color:#ff8a8a">Online lookup failed (no connection or rate limit). Enter numbers yourself.</div>'}}
+function usdaParse(f){const N={};(f.foodNutrients||[]).forEach(x=>{N[String(x.nutrientNumber)]=x.value;N['id'+x.nutrientId]=x.value});
+ const pick=(...k)=>{for(const x of k)if(N[x]!=null)return N[x];return null};
+ const n=f.description.charAt(0)+f.description.slice(1).toLowerCase();
+ return{n,src:'usda',c:pick('208','id1008','957','958','id2047','id2048'),p:pick('203'),cb:pick('205'),f:pick('204'),fb:pick('291'),s:pick('269','id2000'),na:pick('307')}}
+
+// ---- nutrition label OCR (Tesseract.js lazy-loaded from CDN) ----
+let tessP=null;
+function loadTess(){return tessP||(tessP=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=ok;s.onerror=()=>{tessP=null;no()};document.head.appendChild(s)}))}
+async function ocr(inp){const file=inp.files[0];inp.value='';if(!file)return;if(curS!=='food')openFood();$('fsrc').textContent='Reading label… (first time downloads the reader, ~10–20 s)';
+ try{await loadTess();const {data}=await Tesseract.recognize(file,'eng');const L=parseLabel(data.text);
+  if(L.c==null&&L.p==null){$('fsrc').textContent='Couldn\'t read the label clearly — try a closer, flatter photo, or type the numbers.';return}
+  const sg=L.sg||0,fd={n:$('fq').value.trim()||'Label food',src:'label',sv:sg||100};
+  MAC.forEach(m=>{if(L[m.k]!=null)fd[m.k]=L[m.k]*100/(sg||100)});cur=null;setCur(fd);$('famt').value=1;$('funit').value='serving';recalc();
+  $('fsrc').textContent='From label: per serving'+(sg?' ('+sg+' g)':' (serving size not found)')+' — set servings eaten, check numbers, name it.';$('fq').focus()}
+ catch(e){$('fsrc').textContent='Label reader failed to load (needs internet). Type the numbers instead.'}}
+function parseLabel(t){t=t.replace(/[|]/g,' ').replace(/(\d)\s*[oO](?=\s*g\b)/g,'$10');const L={};const num=re=>{const m=t.match(re);return m?parseFloat(m[1].replace(',','.')):null};
+ L.sg=num(/serving\s*size[^\n]*?\(?\s*(\d+(?:[.,]\d+)?)\s*(?:g|grams|ml)\b/i);
+ L.c=num(/calories[^\d\n]{0,15}(\d{1,4})/i);L.f=num(/total\s*fat\s*(\d+(?:\.\d+)?)\s*g/i);
+ L.cb=num(/(?:total\s*)?carbo\w*\.?\s*(\d+(?:\.\d+)?)\s*g/i);L.p=num(/protein\s*(\d+(?:\.\d+)?)\s*g/i);
+ L.fb=num(/fiber\s*(\d+(?:\.\d+)?)\s*g/i);L.s=num(/total\s*sugars?\s*(\d+(?:\.\d+)?)\s*g/i);L.na=num(/sodium\s*(\d+(?:\.\d+)?)\s*mg/i);return L}
+// FUTURE: async function aiEstimate(file){ /* send photo + ST.aiKey to a vision API, return {n,c,p,cb,f} then setCur(...) */ }
+
+// ---- workouts ----
+let sel=null;const WC={Push:'var(--push)',Pull:'var(--pull)',Legs:'var(--legs)'};
+function pick(b){document.querySelectorAll('.ppl button').forEach(x=>x.classList.remove('on'));b.classList.add('on');sel=b.dataset.t}
+function addW(){if(!sel)return toast('Pick Push, Pull, or Legs');wo.push({t:sel,n:$('wn').value,d:$('wd').value||today()});save();$('wn').value='';closeS();render();toast(sel+' logged')}
+function delW(i){if(!confirm('Delete this workout?'))return;wo.splice(i,1);save();render();if(curS==='hist')hSel(hSelD)}
+const woOn=d=>wo.map((w,i)=>({...w,i})).filter(w=>w.d===d);
+function bg(d){const t=[...new Set(woOn(d).map(w=>w.t))].filter(x=>WC[x]);if(!t.length)return'';if(t.length===1)return`background:${WC[t[0]]};`;
+ const st=100/t.length;return`background:linear-gradient(135deg,${t.map((x,i)=>`${WC[x]} ${i*st}% ${(i+1)*st}%`).join(',')});`}
+
+// ---- history calendar ----
+let hv='m',hRef=new Date(),hSelD=today();const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function hView(v){hv=v;document.querySelectorAll('#hv button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));hDraw()}
+function hNav(n){if(hv==='w')hRef.setDate(hRef.getDate()+7*n);else if(hv==='m')hRef=new Date(hRef.getFullYear(),hRef.getMonth()+n,1);else hRef=new Date(hRef.getFullYear()+n,0,1);hDraw()}
+function hDraw(){const el=$('hcal'),td=today();let h='';
+ if(hv==='w'){const s=new Date(hRef);s.setDate(s.getDate()-s.getDay());const e=new Date(s);e.setDate(e.getDate()+6);$('hTitle').textContent=MN[s.getMonth()]+' '+s.getDate()+' – '+MN[e.getMonth()]+' '+e.getDate();
+  h='<div class="wk">';for(let i=0;i<7;i++){const d=new Date(s);d.setDate(s.getDate()+i);const k=ymd(d);
+   h+=`<div onclick="hSel('${k}')" style="${k===hSelD?'outline:2px solid #fff;':''}${k===td?'border:1px solid var(--a);':''}"><span class="sub">${'SMTWTFS'[i]}</span><b>${d.getDate()}</b>${woOn(k).map(w=>`<span class="pill" style="background:${WC[w.t]};${w.t==='Pull'?'color:#fff':''}">${w.t}</span>`).join('')}</div>`}
+  h+='</div>'}
+ else if(hv==='m'){const y=hRef.getFullYear(),m=hRef.getMonth();$('hTitle').textContent=MN[m]+' '+y;h='<div class="cal">'+'SMTWTFS'.split('').map(x=>`<div class="h">${x}</div>`).join('');
+  const f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();for(let i=0;i<f;i++)h+='<div></div>';
+  for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));h+=`<div class="d${k===td?' today':''}${k===hSelD?' sel':''}" style="${bg(k)}" onclick="hSel('${k}')"><span style="${woOn(k).length?'color:#fff;font-weight:700;text-shadow:0 0 3px #000':''}">${d}</span></div>`}h+='</div>'}
+ else{const y=hRef.getFullYear();$('hTitle').textContent=y;h='<div class="yr">';
+  for(let m=0;m<12;m++){h+=`<div class="ym" onclick="hv='m';hRef=new Date(${y},${m},1);hView('m')">${MN[m]}<div class="g">`;const f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate();
+   for(let i=0;i<f;i++)h+='<span></span>';for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));h+=`<i style="${bg(k)}${k===td?'outline:1px solid var(--a);':''}"></i>`}h+='</div></div>'}
+  const yr=wo.filter(w=>w.d.startsWith(y));h+='</div><div class="hint" style="text-align:center;margin-top:8px">'+y+': '+['Push','Pull','Legs'].map(t=>t+' '+yr.filter(w=>w.t===t).length).join(' · ')+'</div>'}
+ el.innerHTML=h}
+function hSel(d){if(!d)return;hSelD=d;$('hdate').value=d;hRef=pd(d);hDraw();const fl=food[d]||[],t=sum(fl),ws=woOn(d),wt=weights.find(x=>x.d===d);
+ $('hday').innerHTML=`<div class="card" style="margin-top:10px"><div class="lbl">${pd(d).toDateString()}</div>
+ <div style="color:#fff;margin-bottom:6px">${shown().map(m=>`${m.n}: <b>${r1(t[m.k])}${m.u}</b>`).join(' · ')}</div>${wt?`<div class="sub">Weight: ${wt.w} lbs</div>`:''}
+ <ul>${ws.map(w=>`<li><span><b style="color:${WC[w.t]}">${w.t}</b> ${esc(w.n)}</span><button class="x" onclick="delW(${w.i})">✕</button></li>`).join('')}
+ ${fl.map((f,i)=>`<li><span>${esc(f.n)}${f.amt?` <span class="sub">${f.amt} ${f.u}</span>`:''}</span><span class="sub">${f.c} cal · ${f.p}g<button class="x" onclick="delF('${d}',${i})">✕</button></span></li>`).join('')}</ul>
+ ${!fl.length&&!ws.length?'<div class="hint">Nothing logged.</div>':''}<button class="btn alt sm" onclick="openFood('${d}')">+ Add food to this day</button></div>`}
+
+// ---- weight ----
+function addWt(){const v=+$('wv').value;if(!(v>0))return toast('Enter your weight');const d=$('wdt').value||today();weights=weights.filter(x=>x.d!==d);weights.push({d,w:v});save();$('wv').value='';wRender();render()}
+function delWt(d){weights=weights.filter(x=>x.d!==d);save();wRender()}
+function wRender(){weights.sort((a,b)=>a.d.localeCompare(b.d));const L=weights[weights.length-1];$('wLatest').textContent=L?L.w+' lbs':'—';
+ const P=weights[weights.length-2];$('wDelta').textContent=L&&P?((L.w-P.w>=0?'+':'')+r1(L.w-P.w)+' lbs since '+P.d):'';
+ $('wList').innerHTML=weights.slice().reverse().map(x=>`<li><span>${x.w} lbs</span><span class="sub">${x.d}<button class="x" onclick="delWt('${x.d}')">✕</button></span></li>`).join('')||'<div class="hint">No weigh-ins yet.</div>';
+ const pts=weights.slice(-30);if(pts.length<2){$('wChart').innerHTML='';return}
+ const t0=pd(pts[0].d)/1,t1=pd(pts[pts.length-1].d)/1||t0+1,mn=Math.min(...pts.map(p=>p.w)),mx=Math.max(...pts.map(p=>p.w)),Wd=300,H=90;
+ const xy=pts.map(p=>[10+(pd(p.d)-t0)/((t1-t0)||1)*(Wd-20),H-10-((p.w-mn)/((mx-mn)||1))*(H-20)]);
+ $('wChart').innerHTML=`<svg viewBox="0 0 ${Wd} ${H}" style="width:100%;margin-top:8px"><polyline fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linejoin="round" points="${xy.map(p=>p.join(',')).join(' ')}"/>${xy.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#fff"/>`).join('')}<text x="4" y="10" fill="#8a9bb5" font-size="10">${mx}</text><text x="4" y="${H-1}" fill="#8a9bb5" font-size="10">${mn}</text></svg>`}
+
+// ---- meals ----
+let mIdx=-1,mItems=[];
+function mealFood(i){const m=meals[i],t=mealTot(m.items),sv=m.serv||1,fd={n:m.n,src:'meal',sv:100,mi:i};MAC.forEach(x=>{if(t[x.k]!=null)fd[x.k]=t[x.k]/sv});return fd}
+function mealTot(items){const t={};items.forEach(it=>{const v=per(it.fd,gramsOf(it.fd,+it.amt||0,it.u));for(const k in v)t[k]=(t[k]||0)+v[k]});return t}
+function mealsRender(){$('mealList').innerHTML=meals.map((m,i)=>{const t=mealTot(m.items),sv=m.serv||1;return`<li><span onclick="mealEdit(${i})">${esc(m.n)} <span class="sub">${Math.round(t.c/sv)} cal · ${r1(t.p/sv)}g P / serving</span></span><span><button class="btn sm" onclick="mealQuick(${i})">Log</button><button class="x" onclick="mealDel(${i})">✕</button></span></li>`}).join('')||'<div class="hint">No saved meals yet. Build one from ingredients.</div>'}
+function mealEdit(i){mIdx=i;const m=i>=0?meals[i]:{n:'',items:[],serv:1};$('mb').style.display='block';$('mName').value=m.n;mItems=JSON.parse(JSON.stringify(m.items));$('mServ').value=m.serv||1;$('mEat').value=1;mRender();if(i<0)$('mName').focus()}
+function mAdd(fd){mItems.push({fd,amt:fd.pc?1:100,u:fd.pc?'piece':'g'});mRender()}
+function mRender(){$('mIngs').innerHTML=mItems.map((it,i)=>`<div class="ing"><span>${esc(it.fd.n)}</span><input type="number" inputmode="decimal" value="${it.amt}" oninput="mItems[${i}].amt=this.value;mTotR()"><select onchange="mItems[${i}].u=this.value;mTotR()">${unitsFor(it.fd).map(u=>`<option${u===it.u?' selected':''}>${u}</option>`).join('')}</select><button class="x" onclick="mItems.splice(${i},1);mRender()">✕</button></div>`).join('');mTotR()}
+function mTotR(){const t=mealTot(mItems),sv=+$('mServ').value||1;$('mTot').innerHTML=`<div class="lbl">Whole meal${sv>1?` · per serving (÷${sv})`:''}</div>`+MAC.slice(0,5).map(m=>`${m.n}: <b>${r1(t[m.k])}${m.u}</b>${sv>1?` <span class="sub">(${r1((t[m.k]||0)/sv)})</span>`:''}`).join('<br>')}
+function mealSave(q){const n=$('mName').value.trim();if(!n)return toast('Name the meal'),false;if(!mItems.length)return toast('Add ingredients'),false;
+ const m={n,items:mItems,serv:+$('mServ').value||1};if(mIdx>=0)meals[mIdx]=m;else{meals.push(m);mIdx=meals.length-1}save();mealsRender();if(!q)toast('Meal saved');return true}
+function mealLog(){if(!mealSave(1))return;logMeal(mIdx,+$('mEat').value||1);$('mb').style.display='none'}
+function mealQuick(i){const s=prompt('How many servings of '+meals[i].n+'?','1');if(s===null)return;logMeal(i,+s||1)}
+function logMeal(i,s){const fd=mealFood(i),e={n:fd.n,amt:s,u:'serving'};MAC.forEach(m=>{if(fd[m.k]!=null)e[m.k]=r1(fd[m.k]*s)});e.c=Math.round(e.c||0);e.p=r1(e.p||0);(food[today()]=food[today()]||[]).push(e);save();render();toast('Logged '+fd.n)}
+function mealDel(i){if(!confirm('Delete meal '+meals[i].n+'?'))return;meals.splice(i,1);save();$('mb').style.display='none';mealsRender()}
+
+// ---- settings ----
+function setRender(){$('setMac').innerHTML=MAC.map(m=>`<div class="tg"><label style="flex:1"><input type="checkbox" ${ST.show.includes(m.k)?'checked':''} onchange="tgl('${m.k}',this.checked)"> ${m.n}</label><input class="gi" type="number" inputmode="decimal" value="${goals[m.k]}" oninput="if(+this.value>0){goals['${m.k}']=+this.value;save();render()}"><span class="sub" style="width:26px;margin-left:4px">${m.u}</span></div>`).join('');
+ $('myList').innerHTML=myFoods.map((f,i)=>`<li><span>${esc(f.n)} <span class="sub">${Math.round(f.c||0)} cal · ${r1(f.p)}g P /${f.sv?'serv':'100g'}</span></span><button class="x" onclick="myFoods.splice(${i},1);save();setRender()">✕</button></li>`).join('')||'<div class="hint">Foods you add that aren\'t built in show up here.</div>'}
+function tgl(k,on){ST.show=MAC.map(m=>m.k).filter(x=>x===k?on:ST.show.includes(x));if(!ST.show.length)ST.show=['c'];save();render()}
+function exportData(){const data={app:'drews-fit-tracker',v:2,exported:new Date().toISOString()};['goals','food','wo','weight','myFoods','meals','settings'].forEach(k=>data[k]=S(k));
+ const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fit-tracker-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();toast('Backup exported')}
+function importData(inp){const f=inp.files[0];inp.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.food&&!d.wo)throw 0;
+ if(!confirm('Replace all current data with this backup?'))return;['goals','food','wo','weight','myFoods','meals','settings'].forEach(k=>{if(d[k]!=null)W(k,d[k])});location.reload()}catch(e){alert('That file isn\'t a valid backup.')}};r.readAsText(f)}
+
+// ---- sheets & home ----
+let curS=null;
+function openS(n){closeS();curS=n;$('m-'+n).classList.add('on');document.body.style.overflow='hidden';
+ if(n==='wo'){$('wd').value=today();const a=ymd(new Date(Date.now()-6*864e5)),r=wo.filter(w=>w.d>=a);$('wkc').textContent='Last 7 days: '+['Push','Pull','Legs'].map(t=>t+' '+r.filter(w=>w.t===t).length).join(' · ')}
+ if(n==='hist'){hRef=new Date();hView(hv);hSel(today())} if(n==='wt'){$('wdt').value=today();wRender()} if(n==='meals'){$('mb').style.display='none';mealsRender()} if(n==='set')setRender()}
+function closeS(){document.querySelectorAll('.modal.on').forEach(m=>m.classList.remove('on'));curS=null;document.body.style.overflow=''}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeS()}));
+const shown=()=>MAC.filter(m=>ST.show.includes(m.k));
+function sum(l){const t={};MAC.forEach(m=>t[m.k]=0);l.forEach(e=>MAC.forEach(m=>t[m.k]+=+e[m.k]||0));return t}
+function render(){const d=today(),l=food[d]||[],t=sum(l);
+ $('macros').innerHTML=shown().map(m=>`<div class="mac"><div class="top"><div class="lbl">${m.n}${m.u?' ('+m.u+')':''}</div><span>${Math.max(0,Math.round(goals[m.k]-t[m.k]))} left</span></div><div><b>${r1(t[m.k])}</b> <span>/ ${goals[m.k]}</span></div><div class="bar"><div style="width:${Math.min(100,t[m.k]/goals[m.k]*100)}%"></div></div></div>`).join('');
+ const ws=woOn(d);$('tlist').innerHTML=ws.map(w=>`<li><span><b style="color:${WC[w.t]}">${w.t}</b> ${esc(w.n)}</span><button class="x" onclick="delW(${w.i})">✕</button></li>`).join('')+
+  l.map((f,i)=>`<li><span>${esc(f.n)}${f.amt?` <span class="sub">${f.amt} ${f.u}</span>`:''}</span><span class="sub">${f.c} cal · ${f.p}g<button class="x" onclick="delF('${d}',${i})">✕</button></span></li>`).join('')||'<div class="hint">Nothing logged yet today.</div>'}
+render();
 </script></body></html>
