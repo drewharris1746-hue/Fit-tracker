@@ -35,7 +35,7 @@ li:last-child{border-bottom:0}ul{padding:0;margin:0}.sub{color:var(--mu);font-si
 .ppl button.on[data-t=Push]{background:var(--push);color:#000}.ppl button.on[data-t=Pull]{background:var(--pull)}.ppl button.on[data-t=Legs]{background:var(--legs);color:#000}
 .ac{background:#0a0a0a;border:1px solid #2a3550;border-radius:10px;margin-top:-2px;max-height:240px;overflow-y:auto}.ac div{padding:10px;border-bottom:1px solid #161d2b;font-size:15px}
 .ac div small{color:var(--mu);margin-left:6px}.ac .tag{color:var(--a);font-size:11px;margin-left:6px}
-.mf{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mf label{font-size:11px;color:var(--mu)}.mf input{margin:2px 0;padding:9px}
+.mfb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mfb label{font-size:13px;color:#cfe0ff;font-weight:600}.mfb input{font-size:24px;font-weight:700;padding:12px;margin:2px 0;border-color:#35507f}.mf{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mf label{font-size:11px;color:var(--mu)}.mf input{margin:2px 0;padding:9px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.cal .h{color:var(--mu);font-size:11px}
 .cal .d{aspect-ratio:1;border-radius:8px;background:#141418;font-size:13px;display:flex;align-items:center;justify-content:center;color:#ccc;position:relative;overflow:hidden}
 .cal .d.today{outline:1px solid var(--a)}.cal .d.sel{outline:2px solid #fff}.cal .d span{position:relative;z-index:1}
@@ -74,7 +74,7 @@ textarea{min-height:110px;font-size:14px}
  <div class="card" id="macros2"></div>
  <button class="btn" onclick="openFood()">+ Add food</button>
  <div class="card" style="margin-top:12px"><div class="lbl">Today's food</div><ul id="tlist"></ul></div>
- <div class="nav nav3"><button onclick="openS('fhist')"><i>📅</i>History</button><button onclick="openS('meals')"><i>🍝</i>Meals</button><button onclick="openFood();setTimeout(()=>lblIn.click(),50)"><i>📷</i>Label</button><button onclick="openS('wt')"><i>⚖️</i>Weight</button></div>
+ <div class="nav nav3"><button onclick="openS('fhist')"><i>📅</i>History</button><button onclick="openS('meals')"><i>🍗</i>Meals</button><button onclick="openFood();setTimeout(()=>lblIn.click(),50)"><i>📷</i>Label</button><button onclick="openS('wt')"><i>⚖️</i>Weight</button></div>
 </div>
 <div class="page" id="pg-wo">
  <div class="card"><div class="lbl">Log workout · pick one or more</div>
@@ -93,8 +93,9 @@ textarea{min-height:110px;font-size:14px}
  <div id="fac" class="ac" style="display:none"></div>
  <div class="row"><input id="famt" type="number" inputmode="decimal" placeholder="Amount" oninput="recalc()"><select id="funit" onchange="recalc()"></select></div>
  <div class="hint" id="fsrc"></div>
- <div class="mf" id="fmf"></div>
+ <div id="fmf"></div>
  <div class="row"><button class="btn alt sm" id="olBtn" onclick="onlineSearch()">🔎 Search online</button><button class="btn alt sm" onclick="togPaste()">📋 Paste info</button><button class="btn alt sm" onclick="lblIn.click()">📷 Label</button></div>
+ <div id="olBox" style="display:none"><div class="row"><input id="olq" placeholder="Search online (e.g. starbucks frappuccino)" onkeydown="if(event.key==='Enter')olGo()"><button class="btn sm" style="flex:0 0 auto" onclick="olGo()">Search</button></div></div>
  <div id="pasteBox" style="display:none"><textarea id="pasteTx" placeholder="Paste nutrition text copied from any website or app (e.g. Calories 1035, Protein 61g, Carbs 105g, Fat 40g, Serving 1 burrito)"></textarea><button class="btn alt sm" style="width:100%" onclick="pasteParse()">Fill from pasted text</button></div>
  <input type="date" id="fdate">
  <button class="btn" id="fAdd" onclick="addFood()">Add</button>
@@ -149,10 +150,10 @@ textarea{min-height:110px;font-size:14px}
 
 <!-- SETTINGS -->
 <div id="m-set" class="modal"><div class="sheet"><div class="shd"><b>Settings</b><button class="x2" onclick="closeS()">Done</button></div>
- <div class="lbl">Show on home · daily goal</div><div id="setMac"></div>
- <div class="lbl" style="margin-top:14px">Online lookup · USDA API key (optional)</div>
- <input id="usdaKey" placeholder="Paste free key from api.data.gov/signup" oninput="ST.usdaKey=this.value.trim();save()" autocomplete="off">
+ <div class="lbl" style="color:#cfe0ff;font-weight:600">USDA API key <span class="sub">(for Search online)</span></div>
+ <input id="usdaKey" placeholder="Paste your USDA API key" oninput="ST.usdaKey=this.value.trim();save()" autocomplete="off">
  <div class="hint">Without a key the app uses USDA's shared demo key, which runs out quickly. A free key takes a minute at api.data.gov/signup.</div>
+ <div class="lbl" style="margin-top:14px">Show (home &amp; add food) · daily goal</div><div id="setMac"></div>
  <div class="lbl" style="margin-top:14px">My foods</div><ul id="myList"></ul>
  <div class="lbl" style="margin-top:14px">Backup</div>
  <div class="row"><button class="btn alt" onclick="exportData()">Export data</button><button class="btn alt" onclick="impIn.click()">Import data</button></div>
@@ -400,9 +401,9 @@ function acPick(i,mode){const fd=acItems[i].fd;$(mode==='f'?'fac':'mac').style.d
 // ---- add food sheet ----
 let cur=null,edited=false;
 let fromHist=false;
-function openFood(d){fromHist=curS==='fhist';$('pasteBox').style.display='none';$('pasteTx').value='';cur=null;edited=false;$('fq').value='';$('famt').value='';$('fac').style.display='none';$('fsrc').textContent='';$('fdate').value=d||today();setUnits(null);mfFill({});openS('food');setTimeout(()=>$('fq').focus(),100)}
+function openFood(d){$('olBox').style.display='none';fromHist=curS==='fhist';$('pasteBox').style.display='none';$('pasteTx').value='';cur=null;edited=false;$('fq').value='';$('famt').value='';$('fac').style.display='none';$('fsrc').textContent='';$('fdate').value=d||today();setUnits(null);mfFill({});openS('food');setTimeout(()=>$('fq').focus(),100)}
 function setUnits(fd,keep){const s=$('funit'),old=s.value;s.innerHTML=unitsFor(fd).map(u=>`<option>${u}</option>`).join('');s.value=keep&&unitsFor(fd).includes(old)?old:(fd&&fd.sv?'serving':'g')}
-function mfFill(v){$('fmf').innerHTML=MAC.map(m=>`<div><label>${m.n}${m.u?' ('+m.u+')':''}</label><input id="mf_${m.k}" type="number" inputmode="decimal" value="${v[m.k]!=null?r1(v[m.k]):''}" oninput="edited=true"></div>`).join('')}
+function mfFill(v){const F=m=>`<div style="${ST.show.includes(m.k)||m.k==='c'||m.k==='p'?'':'display:none'}"><label>${m.n}${m.u?' ('+m.u+')':''}</label><input id="mf_${m.k}" type="number" inputmode="decimal" value="${v[m.k]!=null?r1(v[m.k]):''}" oninput="edited=true"></div>`;$('fmf').innerHTML=`<div class="mfb">${MAC.slice(0,2).map(F).join('')}</div><div class="mf" style="margin-top:6px">${MAC.slice(2).map(F).join('')}</div>`}
 function setCur(fd){cur=fd;edited=false;$('fq').value=fd.n;setUnits(fd);if(!$('famt').value)$('famt').value=fd.sv?1:(fd.pc&&!fd.sv?1:100);if(fd.pc&&!fd.sv)$('funit').value='piece';
  $('fsrc').textContent=fd.src==='usda'?'From USDA FoodData Central':fd.src==='label'?'From nutrition label':fd.src==='meal'?'Saved meal':fd.src==='db'?'Built-in estimate (per 100 g)':'My food';recalc()}
 function recalc(){if(!cur)return;const g=gramsOf(cur,+$('famt').value||0,$('funit').value);mfFill(per(cur,g));edited=false}
@@ -440,9 +441,10 @@ async function offFetch(q){const F='&fields=product_name,brands,serving_size,ser
  return rs.flatMap(r=>r.status==='fulfilled'?(r.value.products||[]):[]).map(offMap).filter(f=>f.c!=null&&f.n&&score(f.brand+' '+f.n,q)>0)}
 let olRes=[];
 function olScore(f,q){return score((f.brand?f.brand+' ':'')+f.n,q)+(f.sv?0.5:0)}
-async function onlineSearch(){const q=$('fq').value.trim();if(!q)return toast('Type what you ate first');const box=$('fac');box.style.display='block';box.innerHTML='<div>Searching USDA and Open Food Facts…</div>';
+function onlineSearch(){const b=$('olBox');$('pasteBox').style.display='none';b.style.display=b.style.display==='none'?'block':'none';if(b.style.display==='block'){$('olq').value=$('fq').value.trim();$('olq').focus();if($('olq').value)olGo()}}
+async function olGo(){const q=$('olq').value.trim();if(!q)return toast('Type something to search');const box=$('fac');box.style.display='block';box.innerHTML='<div>Searching USDA and Open Food Facts…</div>';
  const [u,o]=await Promise.allSettled([usdaFetch(q),offFetch(q)]);let err=[];
- if(u.status==='rejected'){const r=u.reason||{};err.push(r.status===429?'USDA: shared demo key is over its limit — add your free key in Settings':r.status===403?'USDA: API key not accepted — check it in Settings':r.name==='AbortError'?'USDA: timed out':(ST.usdaKey?'USDA: unreachable (offline?)':'USDA: blocked — usually the shared demo key limit; add your free key in Settings'))}
+ if(u.status==='rejected'){const r=u.reason||{};err.push(r.status===429?'USDA: shared demo key is over its limit — add your free key in Settings':r.status===403?'USDA: API key invalid — check it in Settings (⚙︎ → USDA API key)':r.name==='AbortError'?'USDA: timed out':(ST.usdaKey?'USDA: unreachable (offline?)':'USDA: blocked — usually the shared demo key limit; add your free key in Settings'))}
  if(o.status==='rejected')err.push('Open Food Facts: unavailable');
  const all=[...(u.value||[]),...(o.value||[])].filter(f=>f.c>=0&&f.c<=900&&!(f.sv>2000)),seen=new Set();
  olRes=all.map(f=>({f,s:olScore(f,q)})).sort((a,b)=>b.s-a.s).map(x=>x.f).filter(f=>{const k=(f.brand+'|'+f.n+'|'+Math.round(f.c)).toLowerCase();if(seen.has(k))return 0;seen.add(k);return 1}).slice(0,20);
@@ -453,11 +455,12 @@ async function onlineSearch(){const q=$('fq').value.trim();if(!q)return toast('T
   return`<div class="rs" onclick="olPick(${i})"><b>${esc(f.n)}</b>${f.brand?` <span class="sub">${esc(f.brand)}</span>`:''}<small>${Math.round(f.c*m)} cal · ${r1(f.p*m)}g P · ${r1(f.cb*m)}g C · ${r1(f.f*m)}g F — ${b} · ${f.srcN}</small></div>`}).join('')+web}
 function olPick(i){const f=olRes[i];$('fac').style.display='none';const fd=Object.assign({},f,{n:f.brand&&!f.n.toLowerCase().includes(f.brand.toLowerCase().split(',')[0])?f.brand.split(',')[0]+' '+f.n:f.n});$('famt').value='';cur=null;setCur(fd);
  $('fsrc').textContent='From '+f.srcN+(f.sv?' · 1 serving = '+(f.svT||f.sv+' g'):' · per 100 g')+' — check numbers, then Add (saves to My Foods).'}
-function togPaste(){const b=$('pasteBox');b.style.display=b.style.display==='none'?'block':'none';if(b.style.display==='block')$('pasteTx').focus()}
+function togPaste(){$('olBox').style.display='none';const b=$('pasteBox');b.style.display=b.style.display==='none'?'block':'none';if(b.style.display==='block')$('pasteTx').focus()}
 function pasteParse(){const L=parseLabel($('pasteTx').value);if(L.c==null&&L.p==null)return toast('Couldn\'t find calories or protein in that text');
- const sg=L.sg||0,fd={n:$('fq').value.trim()||'Pasted food',src:'paste',sv:sg||100};MAC.forEach(m=>{if(L[m.k]!=null)fd[m.k]=L[m.k]*100/(sg||100)});
+ const nm=$('fq').value.trim()||pasteName($('pasteTx').value),sg=L.sg||0,fd={n:nm||'Pasted food',src:'paste',sv:sg||100};MAC.forEach(m=>{if(L[m.k]!=null)fd[m.k]=L[m.k]*100/(sg||100)});
  cur=null;setCur(fd);$('famt').value=1;$('funit').value='serving';recalc();$('pasteBox').style.display='none';
- $('fsrc').textContent='From pasted text: per serving'+(sg?' ('+sg+' g)':'')+' — name it, check the numbers, then Add (saves to My Foods).';if(!$('fq').value.trim()||$('fq').value==='Pasted food'){$('fq').value='';$('fq').placeholder='Name this food';$('fq').focus()}}
+ $('fsrc').textContent='From pasted text: per serving'+(sg?' ('+sg+' g)':'')+' — name it, check the numbers, then Add (saves to My Foods).'}
+function pasteName(t){for(const l of String(t).split('\n').map(x=>x.trim()))if(l.length>2&&l.length<70&&!/\d/.test(l)&&!/nutrition|facts|serving|calorie|amount|daily|value|per /i.test(l))return l;return''}
 
 // ---- nutrition label OCR (Tesseract.js lazy-loaded from CDN) ----
 let tessP=null;
@@ -482,7 +485,7 @@ function parseLabel(t){t=String(t).replace(/[|•\t]/g,' ').replace(/(\d)\s*[oO]
 // ---- workouts (multi-select: e.g. Push + Cardio same day) ----
 const WT=['Push','Pull','Legs','Cardio','Rest'];let sel=new Set();const WC={Push:'var(--push)',Pull:'var(--pull)',Legs:'var(--legs)',Cardio:'var(--cardio)',Rest:'var(--rest)'};
 const chipTx=t=>t==='Pull'||t==='Cardio'?'#fff':'#000';
-function pick(b){const t=b.dataset.t;if(sel.has(t))sel.delete(t);else{if(t==='Rest')sel.clear();else sel.delete('Rest');sel.add(t)}
+function pick(b){const t=b.dataset.t;if(sel.has(t))sel.delete(t);else{sel.add(t)}
  document.querySelectorAll('.ppl button').forEach(x=>x.classList.toggle('on',sel.has(x.dataset.t)))}
 function addW(){if(!sel.size)return toast('Pick a workout type');const d=$('wd').value||today(),n=$('wn').value;WT.filter(t=>sel.has(t)).forEach(t=>wo.push({t,n,d}));save();
  toast([...sel].join(' + ')+' logged');sel.clear();document.querySelectorAll('.ppl button').forEach(x=>x.classList.remove('on'));$('wn').value='';$('wd').value=today();render()}
@@ -559,7 +562,7 @@ function mealDel(i){if(!confirm('Delete meal '+meals[i].n+'?'))return;meals.spli
 // ---- settings ----
 function setRender(){$('setMac').innerHTML=MAC.map(m=>`<div class="tg"><label style="flex:1"><input type="checkbox" ${ST.show.includes(m.k)?'checked':''} onchange="tgl('${m.k}',this.checked)"> ${m.n}</label><input class="gi" type="number" inputmode="decimal" value="${goals[m.k]}" oninput="if(+this.value>0){goals['${m.k}']=+this.value;save();render()}"><span class="sub" style="width:26px;margin-left:4px">${m.u}</span></div>`).join('');
  $('myList').innerHTML=myFoods.map((f,i)=>`<li><span>${esc(f.n)} <span class="sub">${Math.round(f.c||0)} cal · ${r1(f.p)}g P /${f.sv?'serv':'100g'}</span></span><button class="x" onclick="myFoods.splice(${i},1);save();setRender()">✕</button></li>`).join('')||'<div class="hint">Foods you add that aren\'t built in show up here.</div>'}
-function tgl(k,on){ST.show=MAC.map(m=>m.k).filter(x=>x===k?on:ST.show.includes(x));if(!ST.show.length)ST.show=['c'];save();render()}
+function tgl(k,on){ST.show=MAC.map(m=>m.k).filter(x=>x===k?on:ST.show.includes(x));if(!ST.show.length)ST.show=['c'];save();render();if(document.getElementById('mf_c'))mfFill(readMF())}
 function exportData(){const data={app:'drews-fit-tracker',v:2,exported:new Date().toISOString()};['goals','food','wo','weight','myFoods','meals','settings'].forEach(k=>data[k]=S(k));
  const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fit-tracker-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();toast('Backup exported')}
 function importData(inp){const f=inp.files[0];inp.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.food&&!d.wo)throw 0;
